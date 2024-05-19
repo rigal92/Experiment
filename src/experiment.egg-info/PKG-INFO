@@ -1,0 +1,13 @@
+Metadata-Version: 2.1
+Name: experiment
+Version: 0.0.1
+Summary: A small example package
+Author: Riccardo Galafassi
+Author-email: riccardo.galafassi@univ-lyon1.fr
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+Requires-Dist: numpy
+Requires-Dist: pandas
+Requires-Dist: scimate
+
+long_description missing

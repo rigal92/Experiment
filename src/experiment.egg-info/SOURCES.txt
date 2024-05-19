@@ -1,0 +1,15 @@
+pyproject.toml
+setup.py
+src/experiment.egg-info/PKG-INFO
+src/experiment.egg-info/SOURCES.txt
+src/experiment.egg-info/dependency_links.txt
+src/experiment.egg-info/requires.txt
+src/experiment.egg-info/top_level.txt
+src/expy/__init__.py
+src/expy/event.py
+src/expy/event_backup.py
+src/expy/event_backup2.py
+src/expy/event_operations.py
+src/expy/experiment.py
+src/expy/plotter.py
+src/expy/support.py
