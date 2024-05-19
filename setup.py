@@ -12,7 +12,7 @@ setuptools.setup(
     long_description="long_description missing",
     long_description_content_type="text/markdown",
     package_dir={"": "src"},
-    packages=setuptools.find_packages(where="src"),
+    packages=setuptools.find_packages(where="src", ignore = ["tests"]),
     python_requires=">=3.6",
     install_requires=['numpy','pandas','scimate'],
 )
