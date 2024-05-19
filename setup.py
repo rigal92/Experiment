@@ -7,7 +7,7 @@ setuptools.setup(
     name="experiment",
     version="0.0.1",
     author="Riccardo Galafassi",
-    author_email="riccardo.galafassi@univ-lyon1.fr",
+    author_email="rigal@live.it",
     description="A small example package",
     long_description="long_description missing",
     long_description_content_type="text/markdown",
