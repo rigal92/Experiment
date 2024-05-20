@@ -5,7 +5,7 @@ import setuptools
 
 setuptools.setup(
     name="experiment",
-    version="0.0.1",
+    version="2.0.0",
     author="Riccardo Galafassi",
     author_email="rigal@live.it",
     description="A small example package",
