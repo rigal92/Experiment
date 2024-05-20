@@ -135,7 +135,8 @@ class Experiment(dict):
 				self[name].read_fityk(f, errors)
 
 		if(not_found):
-			print(f"{len(not_found)} files did not find a match. \n{not_found}")
+			print(f"	{len(not_found)} files did not find a match when loading peaks.")
+			print(*not_found, sep = "\n")
 
 		self.tidy_functions()
 
@@ -273,6 +274,13 @@ class Experiment(dict):
 			d = json.load(f)
 		for key,value in d.items():
 			self[key] = read_event(value)
+
+	def __repr__(self):
+		return "-"*30 + "\n" + "\n".join([f"{v}\n" + "-"*30 for v in self.values()])
+
+
+
+
 
 
 

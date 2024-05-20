@@ -218,7 +218,7 @@ class Event:
         """
         #check that self.function contains a function table
         if(self.function is None):
-            print(f"WARNING! {self.name} does not contain any functions. Ignored")
+            print(f"WARNING! {self.name} does not contain any functions. Ignored when creating the function table")
             return pd.DataFrame()
             
             
@@ -256,7 +256,7 @@ class Event:
         """
         #check that self.function contains a function table
         if(self.function_flat is None):
-            print(f"WARNING! {self.name} does not contain any functions. Ignored")
+            print(f"WARNING! {self.name} does not contain any functions. Ignored when creating the function table")
             return pd.Series()
             
             
@@ -409,6 +409,16 @@ class Event:
 
         }
         return dic
+
+    def __repr__(self):
+        #if functions have been added join them in the printing
+        if(self.function is not None):
+            f = f"\nFunctions: {self.function.fname.to_list()}"
+        else:
+            f = ""
+
+
+        return f"Name: {self.name}\nAttributes: {self.attributes}" + f
 
 
 
