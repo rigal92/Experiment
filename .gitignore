@@ -54,3 +54,7 @@ subprojects/*/
 ehthumbs.db
 Icon?
 Thumbs.db
+
+# Project specific #
+######################
+tests
