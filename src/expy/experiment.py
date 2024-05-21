@@ -261,19 +261,29 @@ class Experiment(dict):
 		return json.dumps({key:value.to_dict() for key,value in self.items()},**kwds) 
 
 	# json file out
-	def to_json_file(self,filename,**kwds):
+	def to_json_file(self,filename, indent = "\t", **kwds):
 		"""
-		Save to a json file. **kwds** can be passed to json.dump 
+		Save to a json file. 
+		Input
+		--------------------------
+		filename: str
+			file name to save
+		indent: str
+			formatting option for the indentation in json.dump
+		kwds:
+			passed to json.dump 
+
+
 		"""
 		with open(filename,"w") as f:
-			return json.dump({key:value.to_dict() for key,value in self.items()},f,**kwds) 
+			return json.dump({key:value.to_dict() for key,value in self.items()},f, indent = indent, **kwds) 
 
 	# json file in
 	def read_json_file(self,filename):
 		with open(filename) as f:
 			d = json.load(f)
 		for key,value in d.items():
-			self[key] = read_event(value)
+			self[key] = read_event(value, flag = "read_json_file")
 
 	def __repr__(self):
 		return "-"*30 + "\n" + "\n".join([f"{v}\n" + "-"*30 for v in self.values()])
