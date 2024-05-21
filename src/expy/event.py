@@ -40,43 +40,8 @@ def tokenize(string, char = "_"):
             count +=1
     return tokens
 
-def read_event(dic, flag = None):
-    """
-    Parse keywords from a dictionary and creates an event.
-    
-    Input
-    --------------------------
-    dic: dict
-        dictionary to parse the event. 
-        Accepted keys for the dictionary are: 
-            "name", "attributes", "data", "function" 
-
-    flag: str or None, default = None
-        Argument passed to Event constructor. Handles special cases.
-        Accepted values:
-        - "read_json_file": handles the creation of the DataFrames 
-          stored in the json experiment file 
-    Returns
-    --------------------------
-    Event
-
-    """
-    def check(s):
-        # get the value from the dict or assign None if missing
-        val = dic.get(s)
-        if(val): 
-            return val
-        else: 
-            return None
-
-
-    ev = Event(**{key:check(key) for key in ["name", "attributes", "data", "function"]}, flag = flag)
-    return ev
-
 def flatten_function(data):
-    """
-    Create a flatten version of df. 
-    """
+    """Create a flatten version of a function DataFrame."""
     df = data.copy()
     names = df.fname 
     #rename duplicates to avoid conlicts adding _n if more then one occurence where n is the occurrence index 
@@ -133,12 +98,11 @@ class Event:
                 self.function = pd.DataFrame(function)
         else:
             self.function = function
-        self.function_flat = None
 
-        # if function:
-        #     self.function_flat = flatten_function(function)
-        # else:
-        #     self.function_flat = None
+        if self.function is not None:
+            self.function_flat = flatten_function(self.function)
+        else:
+            self.function_flat = None
 
 
     # -----------------------------------------------------------------
