@@ -197,10 +197,15 @@ class Experiment(dict):
 	# -----------------------------------------------------------------
 
 	# binary out
-	def save(self,filename):
+	def save_pickle(self,filename):
 		"""
-		Save the Experiment as binary. 
-
+		Save the Experiment as binary.  
+		--------------------------
+		DEPRECATED
+		Replace with saving and reading using json. More stable and human
+		readable. 
+		Use for experiments saved using experiment v1.0.0
+		--------------------------
 		Input
 		-----------------------------------------------------------------
 		filename: str 
@@ -212,10 +217,15 @@ class Experiment(dict):
 
 	# binary in 
 	@staticmethod
-	def open(filename):
+	def open_pickle(filename):
 		"""
-		Read the Experiment from a binary file.
-
+		Read the Experiment from a binary file. 
+		--------------------------
+		DEPRECATED
+		Replace with saving and reading using json. More stable and human
+		readable. 
+		Use for experiments saved using experiment v1.0.0
+		--------------------------
 		"""
 		with open(filename,"rb") as f:
 			return pickle.load(f)
@@ -261,7 +271,7 @@ class Experiment(dict):
 		return json.dumps({key:value.to_dict() for key,value in self.items()},**kwds) 
 
 	# json file out
-	def to_json_file(self,filename, indent = "\t", **kwds):
+	def save(self,filename, indent = "\t", **kwds):
 		"""
 		Save to a json file. 
 		Input
@@ -275,11 +285,13 @@ class Experiment(dict):
 
 
 		"""
+		if(not filename.endswith(".json")):
+			filename += ".json"
 		with open(filename,"w") as f:
 			return json.dump({key:value.to_dict() for key,value in self.items()},f, indent = indent, **kwds) 
 
 	# json file in
-	def read_json_file(self,filename):
+	def open(self,filename):
 		with open(filename) as f:
 			d = json.load(f)
 		for key,value in d.items():
