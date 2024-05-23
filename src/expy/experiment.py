@@ -27,7 +27,7 @@ class Experiment(dict):
     def summary(self):
         print(f"Experiment: {self.name} \n{len(self)} events found")
 
-    def tidy_functions(self,extra = "all"):
+    def tidy_functions(self,extra = "all", inplace = True):
         """
         Assign self.functions to a DataFrrame with all the event functions
         attached.
@@ -43,11 +43,19 @@ class Experiment(dict):
             - str will be match with either self.name or a value in 
               self.attributes. Missing columns will be skipped
             - list as for the point above but for a list of str
+        inplace: bool, default: True
+            modify the value inplace if True. return the function tables otherwise
 
         """
-        self.functions = pd.concat([event.get_function_table(extra) for event in self.values()])
-        self.functions.reset_index(drop = True, inplace = True)
-        self.functions_flat = pd.DataFrame([event.get_function_flat(extra) for event in self.values()])
+        functions = pd.concat([event.get_function_table(extra) for event in self.values()])
+        functions.reset_index(drop = True, inplace = True)
+        functions_flat = pd.DataFrame([event.get_function_flat(extra) for event in self.values()])
+        if inplace:
+            self.functions = functions
+            self.functions_flat = functions_flat
+        else:
+            return functions, functions_flat
+    
 
 
 
