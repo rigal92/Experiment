@@ -3,7 +3,6 @@ import pandas as pd
 from .event_operations import *
 from copy import deepcopy
 
-# metti none per others come opzione per non plottarli 
 def plot_event(
         data,
         x = "x",
@@ -218,13 +217,16 @@ def plot_stack(
     elif(isinstance(labels, list)):
         if len(labels) != len(experiment):
             raise ValueError("the length of labels is not matching the length of experiment.")
-    if labels_format:
-        labels = map(format, labels, [labels_format]*len(labels))
+    if labels_format and (not isinstance(labels, type(None))):
+        try:
+            labels = list(map(format, labels, [labels_format]*len(labels)))
+        except:
+            print("Warning! Formatting of the labels was not possible. Skipping.")
 
 
     if (not ax):
         ax = plt.axes()
-    for i,(val,lab) in enumerate(zip(experiment.values(), labels)):
+    for i,val in enumerate(experiment.values()):
         plot_event(val.data,
             x = x,
             normalized =  normalized,
@@ -239,7 +241,8 @@ def plot_stack(
             ylim = ylim,
             **kwargs
             )
-        ax.text(xlabels, i*factor + ylabels_shift, lab, transform = ax.get_yaxis_transform())
+        if(not isinstance(labels,type(None))):
+            ax.text(xlabels, i*factor + ylabels_shift, labels[i], transform = ax.get_yaxis_transform())
     return ax
 
 
