@@ -55,7 +55,12 @@ class Experiment(dict):
             self.functions_flat = functions_flat
         else:
             return functions, functions_flat
-    
+    def get_attributes(self):
+        """
+        Return a table with the attributes 
+        """
+        return pd.DataFrame([event.attributes for event in self.values()])
+
 
 
 
