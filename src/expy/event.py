@@ -173,11 +173,12 @@ class Event:
         """
         Rename standard column fityk names to the functions names in self.function
         """
-        names = self.function.get("fname")
-
-        if(isinstance(names,type(None))):
-            print("Names not found. Impossible to rename, consider to add functions.")
+        if(isinstance(self.function,type(None))):
+            print("Functions not found. Impossible to rename, consider to add functions.")
             return
+
+
+        names = self.function.get("fname")
         dic = {}
         for i,val in enumerate(names):
             if(not isinstance(dic.get(val),type(None))):
@@ -189,13 +190,11 @@ class Event:
             self.data.rename(columns= {f"f{i}":val},inplace = True)
 
 
-
-
     # -----------------------------------------------------------------
     # Loaders 
     # -----------------------------------------------------------------
 
-    def get_function_table(self,extra = "all"):
+    def get_function_table(self,extra = "all", verbose = False):
         """
         Return function table where extra columns can be added. 
 
@@ -210,6 +209,8 @@ class Event:
             - str will be match with either self.name or a value in 
               self.attributes. Missing columns will be skipped
             - list as for the point above but for a list of str
+        verbose: bool, default: False
+            print warnings when True 
         Return
         -----------------------------------------------------------------
         pandas.DataFrame:
@@ -218,7 +219,7 @@ class Event:
         """
         #check that self.function contains a function table
         if(self.function is None):
-            print(f"WARNING! {self.name} does not contain any functions. Ignored when creating the function table")
+            if verbose: print(f"WARNING! {self.name} does not contain any functions. Ignored when creating the function table")
             return pd.DataFrame()
             
             
@@ -243,7 +244,7 @@ class Event:
         return df
 
 
-    def get_function_flat(self,extra = "all"):
+    def get_function_flat(self,extra = "all", verbose = False):
         """
         Return function_flat where extra values can be added. See 
         get_function_table for possible inputs
@@ -256,7 +257,7 @@ class Event:
         """
         #check that self.function contains a function table
         if(self.function_flat is None):
-            print(f"WARNING! {self.name} does not contain any functions. Ignored when creating the function table")
+            if verbose: print(f"WARNING! {self.name} does not contain any functions. Ignored when creating the function table")
             return pd.Series()
             
             

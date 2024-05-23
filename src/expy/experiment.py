@@ -14,11 +14,40 @@ sort_key_P = lambda x:x[1].attributes["P"]
 #should it be a dictionary i.e. a dictionary of events each event has a name 
 class Experiment(dict):
 
-    def __init__(self, name = ""):
-        super().__init__()
-        self.name = name
-        self.functions = None
-        self.functions_flat = None
+    def __init__(self, *args, name = ""):
+        """
+        Constructor.
+        Inputs
+        -----------------------------------------------------------------
+        name: str, default:""
+            experiment's name
+        *args:
+            the only accepted signature is one positional argument of 
+            type dict. The dictionary must contain only Event values.
+
+        """
+        if len(args) == 0:
+            self.name = name
+            super().__init__({})
+            self.functions = None
+            self.functions_flat = None
+        elif len(args) == 1:
+            data = args[0]
+            if isinstance(data, dict):
+                if all(isinstance(e, Event) for e in data.values()):
+                    self.name = name
+                    super().__init__(data)
+                    self.tidy_functions()
+                else:
+                    raise TypeError("""Unsupported data type passed when calling
+                        the Experiment constructor. Only dictionaries of Event 
+                        are accepted.""")
+            else: 
+                raise TypeError("""Unsupported data type passed to the 
+                    constructor.""")
+        else:
+            raise ValueError("Too many arguments passed to the constructor")
+
 
     # -----------------------------------------------------------------
     # Operations on dictionary
@@ -27,7 +56,7 @@ class Experiment(dict):
     def summary(self):
         print(f"Experiment: {self.name} \n{len(self)} events found")
 
-    def tidy_functions(self,extra = "all"):
+    def tidy_functions(self,extra = "all", inplace = True):
         """
         Assign self.functions to a DataFrrame with all the event functions
         attached.
@@ -43,11 +72,27 @@ class Experiment(dict):
             - str will be match with either self.name or a value in 
               self.attributes. Missing columns will be skipped
             - list as for the point above but for a list of str
+        inplace: bool, default: True
+            modify the value inplace if True. return the function tables otherwise
 
         """
-        self.functions = pd.concat([event.get_function_table(extra) for event in self.values()])
-        self.functions.reset_index(drop = True, inplace = True)
-        self.functions_flat = pd.DataFrame([event.get_function_flat(extra) for event in self.values()])
+        functions = pd.concat([event.get_function_table(extra) for event in self.values()])
+        functions.reset_index(drop = True, inplace = True)
+        functions_flat = pd.DataFrame([event.get_function_flat(extra) for event in self.values()])
+        if inplace:
+            self.functions = functions
+            self.functions_flat = functions_flat
+        else:
+            return functions, functions_flat
+    def get_attributes(self):
+        """
+        Return a table with the attributes 
+        """
+        return pd.DataFrame([event.attributes for event in self.values()])
+
+    def sort(self, *args, **kargs):
+        """Sort experiment using sorted. *args and **kargs are passed to sorted."""
+        return type(self)(dict(sorted(self.items(), *args, **kargs)), name = self.name)
 
 
 
@@ -89,9 +134,10 @@ class Experiment(dict):
             else:
                 self[name].get_data(f,header = header)
 
-    def load_peaks(self,files, folder = True, extension = ".peaks",errors = True):
+    def load_peaks(self,files, folder=True, extension=".peaks", errors=True, rename_data_columns=True):
         """
-        Matches function files to the events. If extension .peaks is used, files are assumed to be fityk function files.
+        Matches function files to the events. If extension .peaks is used,
+        files are assumed to be fityk function files.
 
         Input
         -----------------------------------------------------------------
@@ -103,6 +149,9 @@ class Experiment(dict):
             can specify the file extension when files is a folder name
         errors: bool, default True
             adds function error parameters from file  
+        rename_data_columns: bool, default = True
+            calls the function rename_data_columns of Event. Works only if the 
+            extension is ".peaks" (Fityk functions table)
 
         Return 
         -----------------------------------------------------------------
@@ -124,6 +173,7 @@ class Experiment(dict):
 
             elif(extension == ".peaks"):
                 self[name].read_fityk(f, errors)
+                self[name].rename_data_columns()
 
         if(not_found):
             print(f"{len(not_found)} files did not find a match when loading peaks.")
