@@ -89,9 +89,10 @@ class Experiment(dict):
             else:
                 self[name].get_data(f,header = header)
 
-    def load_peaks(self,files, folder = True, extension = ".peaks",errors = True):
+    def load_peaks(self,files, folder=True, extension=".peaks", errors=True, rename_data_columns=True):
         """
-        Matches function files to the events. If extension .peaks is used, files are assumed to be fityk function files.
+        Matches function files to the events. If extension .peaks is used,
+        files are assumed to be fityk function files.
 
         Input
         -----------------------------------------------------------------
@@ -103,6 +104,9 @@ class Experiment(dict):
             can specify the file extension when files is a folder name
         errors: bool, default True
             adds function error parameters from file  
+        rename_data_columns: bool, default = True
+            calls the function rename_data_columns of Event. Works only if the 
+            extension is ".peaks" (Fityk functions table)
 
         Return 
         -----------------------------------------------------------------
@@ -124,6 +128,7 @@ class Experiment(dict):
 
             elif(extension == ".peaks"):
                 self[name].read_fityk(f, errors)
+                self[name].rename_data_columns()
 
         if(not_found):
             print(f"{len(not_found)} files did not find a match when loading peaks.")

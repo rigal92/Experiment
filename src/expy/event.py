@@ -173,11 +173,12 @@ class Event:
         """
         Rename standard column fityk names to the functions names in self.function
         """
-        names = self.function.get("fname")
-
-        if(isinstance(names,type(None))):
-            print("Names not found. Impossible to rename, consider to add functions.")
+        if(isinstance(self.function,type(None))):
+            print("Functions not found. Impossible to rename, consider to add functions.")
             return
+
+
+        names = self.function.get("fname")
         dic = {}
         for i,val in enumerate(names):
             if(not isinstance(dic.get(val),type(None))):
