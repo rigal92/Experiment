@@ -19,12 +19,11 @@ class Experiment(dict):
         Constructor.
         Inputs
         -----------------------------------------------------------------
+        name: str, default:""
+            experiment's name
         *args:
             the only accepted signature is one positional argument of 
             type dict. The dictionary must contain only Event values.
-        name: str, default:""
-            experiment's name
-
 
         """
         if len(args) == 0:
@@ -35,8 +34,8 @@ class Experiment(dict):
         elif len(args) == 1:
             data = args[0]
             if isinstance(data, dict):
-                self.name = name
                 if all(isinstance(e, Event) for e in data.values()):
+                    self.name = name
                     super().__init__(data)
                     self.tidy_functions()
                 else:
@@ -91,8 +90,9 @@ class Experiment(dict):
         """
         return pd.DataFrame([event.attributes for event in self.values()])
 
-    def sort(self):
-        pass
+    def sort(self, *args, **kargs):
+        """Sort experiment using sorted. *args and **kargs are passed to sorted."""
+        return type(self)(dict(sorted(self.items(), *args, **kargs)), name = self.name)
 
 
 
