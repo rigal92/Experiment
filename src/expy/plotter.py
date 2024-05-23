@@ -30,7 +30,7 @@ def plot_event(
     -----------------------------------------------------------------
     data: pandas.DataFrame
         data to plot
-    x : str or None, default "x"
+    x : str, default "x"
         Variable for x axis
     normalized: dict or None, default: {"ref":"y", "exclude":"x"}
         Dictionary with the keywords for normalization. Only **ref**
@@ -90,7 +90,8 @@ def plot_event(
         if(drop_bg == True):
             df.drop(labels, axis = 1, inplace = True)
         if(to_background is None):
-            to_background = df.columns
+            #select all columns apart for x
+            to_background = list(filter(lambda y:y!=x, df.columns))
         df[to_background] = df[to_background].sub(bg,axis = 0)
     #manage x limits
     if(xlim):
@@ -152,16 +153,21 @@ def plot_event(
 
 
 
-def plot_stack(experiment,
+def plot_stack(
+        experiment,
+        factor = 1,
+        labels = None,
+        xlabels = 1.01,
+        ylabels_shift = 0,
+        #sorting
+        sort = None,
+        reverse = False,
         x = "x",
+        #data edit
         normalized = {"ref":"y", "exclude":"x"}, 
         bg_pattern = "Bg",
         to_background = ["y","ftot"],
         drop_bg = True,
-        factor = 1,
-        #sorting
-        sort = None,
-        reverse = False,
         #plotting
         ax = None,
         y_plot = {"pos":[".k"], "ms":2}, 
@@ -171,6 +177,30 @@ def plot_stack(experiment,
         ylim = None,
         **kwargs
         ):
+    """
+    Stack plot of the events. Only the parameters specific to plot_stack
+    are described. For the other inputs see plot_event.
+    Inputs
+    -----------------------------------------------------------------
+    experiment: expy.Experiment
+        the experiment to plot
+    factor: float, default:1
+        multiplication factor to shift the data
+    labels: list or None, default: None
+        if different from None it adds text at each plot edge. labels 
+        must be of the same length of experiment and contain elements 
+        that can be converted into strings
+    xlabels: fload, default: 1.01
+        x postition of the labels in axes coordinates. 1.01 is on the 
+        outside of the edge on the right side
+    ylabels_shift: float, default: 0
+        y shift of each label from the 0 of the plots 
+    sort: function or None, default: None
+        key to be passed to sorted for custom sorting of the plots
+    reverse: bool, default:False
+        allows to reverse the order of sort
+
+    """
     
 
     if (sort):
@@ -178,7 +208,7 @@ def plot_stack(experiment,
 
     if (not ax):
         ax = plt.axes()
-    for i,val in enumerate(experiment.values()):
+    for i,(val,lab) in enumerate(zip(experiment.values(), labels)):
         plot_event(val.data,
             x = x,
             normalized =  normalized,
@@ -193,6 +223,7 @@ def plot_stack(experiment,
             ylim = ylim,
             **kwargs
             )
+        ax.text(xlabels, i*factor + ylabels_shift, lab, transform = ax.get_yaxis_transform())
     return ax
 
 
