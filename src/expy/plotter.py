@@ -12,6 +12,7 @@ def plot_event(
         normalized = {"ref":"y", "exclude":"x"}, 
         bg_pattern = None,
         to_background = ["y","ftot"],
+        drop_bg = True,
         shift = 0,
         #plotting parameters
         axes = None,
@@ -45,6 +46,8 @@ def plot_event(
     to_background: None, str or list, default: ["y","ftot"]
         Column names to which the background will be substracted.
         None value will affect all the columns
+    drop_bg: Bool, default: True
+        avoid drawing columns used for the background substraction 
     shift: float, default: 0
         allowes for shifting the spectrum of **shift**
     y_plot: dict or None, default: {"positionals":[".k"], "ms":2}
@@ -84,8 +87,9 @@ def plot_event(
     #remove bg
     if(bg_pattern):
         bg, labels = background(df,bg_pattern)
-        df.drop(labels, axis = 1, inplace = True)
-        if(not to_background):
+        if(drop_bg == True):
+            df.drop(labels, axis = 1, inplace = True)
+        if(to_background is None):
             to_background = df.columns
         df[to_background] = df[to_background].sub(bg,axis = 0)
     #manage x limits
@@ -153,6 +157,7 @@ def plot_stack(experiment,
         normalized = {"ref":"y", "exclude":"x"}, 
         bg_pattern = "Bg",
         to_background = ["y","ftot"],
+        drop_bg = True,
         factor = 1,
         #sorting
         sort = None,
