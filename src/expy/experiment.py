@@ -14,11 +14,41 @@ sort_key_P = lambda x:x[1].attributes["P"]
 #should it be a dictionary i.e. a dictionary of events each event has a name 
 class Experiment(dict):
 
-    def __init__(self, name = ""):
-        super().__init__()
-        self.name = name
-        self.functions = None
-        self.functions_flat = None
+    def __init__(self, *args, name = ""):
+        """
+        Constructor.
+        Inputs
+        -----------------------------------------------------------------
+        *args:
+            the only accepted signature is one positional argument of 
+            type dict. The dictionary must contain only Event values.
+        name: str, default:""
+            experiment's name
+
+
+        """
+        if len(args) == 0:
+            self.name = name
+            super().__init__({})
+            self.functions = None
+            self.functions_flat = None
+        elif len(args) == 1:
+            data = args[0]
+            if isinstance(data, dict):
+                self.name = name
+                if all(isinstance(e, Event) for e in data.values()):
+                    super().__init__(data)
+                    self.tidy_functions()
+                else:
+                    raise TypeError("""Unsupported data type passed when calling
+                        the Experiment constructor. Only dictionaries of Event 
+                        are accepted.""")
+            else: 
+                raise TypeError("""Unsupported data type passed to the 
+                    constructor.""")
+        else:
+            raise ValueError("Too many arguments passed to the constructor")
+
 
     # -----------------------------------------------------------------
     # Operations on dictionary
@@ -61,6 +91,8 @@ class Experiment(dict):
         """
         return pd.DataFrame([event.attributes for event in self.values()])
 
+    def sort(self):
+        pass
 
 
 
