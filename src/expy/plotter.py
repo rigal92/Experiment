@@ -3,7 +3,6 @@ import pandas as pd
 from .event_operations import *
 from copy import deepcopy
 
-
 # metti none per others come opzione per non plottarli 
 def plot_event(
         data,
@@ -157,6 +156,7 @@ def plot_stack(
         experiment,
         factor = 1,
         labels = None,
+        labels_format = None,
         xlabels = 1.01,
         ylabels_shift = 0,
         #sorting
@@ -186,10 +186,14 @@ def plot_stack(
         the experiment to plot
     factor: float, default:1
         multiplication factor to shift the data
-    labels: list or None, default: None
-        if different from None it adds text at each plot edge. labels 
-        must be of the same length of experiment and contain elements 
-        that can be converted into strings
+    labels: str, list or None, default: None
+        if different from None it adds text at each plot edge.  
+        Accepted values:
+        - str indicating the attribute name to use
+        - list of string. It must be of the same length of experiment.
+          Sorting will not affect this list  
+    labels_format: str or None, default: None
+        formats labels using format. egs: labels_format='.2f'
     xlabels: fload, default: 1.01
         x postition of the labels in axes coordinates. 1.01 is on the 
         outside of the edge on the right side
@@ -204,7 +208,19 @@ def plot_stack(
     
 
     if (sort):
-        experiment = dict(sorted(experiment.items(), key = sort, reverse = reverse))
+        experiment = experiment.sort(key = sort, reverse = reverse)
+    if(isinstance(labels, str)):
+        try:
+            labels = experiment.get_attributes()[labels]
+        except KeyError:
+            print(f"KeyError: No attibutes named {labels} available. Skipping stack plot labelling.")
+            labels = None
+    elif(isinstance(labels, list)):
+        if len(labels) != len(experiment):
+            raise ValueError("the length of labels is not matching the length of experiment.")
+    if labels_format:
+        labels = map(format, labels, [labels_format]*len(labels))
+
 
     if (not ax):
         ax = plt.axes()
