@@ -1,6 +1,10 @@
 import json 
 import pickle
+import os
+
 from expy import Experiment, Event
+
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def open_pickle(filename):
     """
@@ -58,3 +62,16 @@ def read_event(dic, flag = None):
 
     ev = Event(**{key:check(key) for key in ["name", "attributes", "data", "function"]}, flag = flag)
     return ev
+
+def get_notebook_template(folder = "./"):
+    import shutil
+    path = os.path.join(folder,"Experiment.ipynb")
+    if(os.path.exists(path)):
+        print("Warning!", path, "already exists. Skipping this file.")
+    else:
+        shutil.copyfile(os.path.join(ROOT_DIR, "jupyter/Standard.ipynb"), path)
+    path = os.path.join(folder,"LabNotes.mb")
+    if(os.path.exists(path)):
+        print("Warning!", path, "already exists. Skipping this file.")
+    else:
+        shutil.copyfile(os.path.join(ROOT_DIR, "jupyter/LabNotes.md"), path)
