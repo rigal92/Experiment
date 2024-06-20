@@ -1,3 +1,22 @@
 [build-system]
-requires = ["setuptools>=42"]
+requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "experiment"
+version = "2.1.0"
+dependencies = ["numpy","pandas","scimate", "scipy"]
+authors = [
+  { name="Riccardo Galafassi", email="rigal@live.it" },
+]
+description = "A small example package"
+readme = {file = "README.txt", content-type = "text/markdown"}
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
