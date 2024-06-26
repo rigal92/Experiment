@@ -43,12 +43,12 @@ def tokenize(string, char = "_"):
 def flatten_function(data):
     """Create a flatten version of a function DataFrame."""
     df = data.copy()
-    names = df.fname 
+    names = df.pop("fname") 
     #rename duplicates to avoid conlicts adding _n if more then one occurence where n is the occurrence index 
     names = names + "_" + pd.DataFrame(names).groupby("fname").cumcount().astype(str).replace("0","")
     names = names.str.removesuffix("_")
 
-    df.drop(columns = ["fid","fname"],inplace = True)
+    df.drop(columns = ["fid","Lineshape"], errors = "ignore", inplace = True)
     indexes = pd.MultiIndex.from_product([names, df.columns])
 
     s = pd.concat([i[1] for i in df.iterrows()])
@@ -63,7 +63,7 @@ class Event:
     """
     Event class gathering in a dictionary the data and fit results
     """
-    def __init__(self, data = None, name = None, attributes = None, function = None, tokenby = "_", flag = None):
+    def __init__(self, data = None, name = None, attributes = None, function = None, tokenby = "_", flag = None, header = "fityk"):
         """
         Input
         -----------------------------------------------------------------
@@ -72,9 +72,18 @@ class Event:
             self.data will be assigned to the DataFrame
         tokenby: str , default is "_"
             Character used by tokenize
+        flag: str or None, default None
+            Handle special cases
+            Accepted values:
+            - "read_json_file": handles the creation of the DataFrames 
+              stored in the json experiment file 
+        header: str, default = fityk
+            can specify the header format to pass to load_data
         """
+
+        # handle data reading
         if(isinstance(data,str)):
-            self.get_data(data)
+            self.get_data(data, header=header)
             #remove file folder path and file type
             self.name = strip_path(data)
             self.attributes = tokenize(self.name)
@@ -88,17 +97,23 @@ class Event:
                     self.data = pd.DataFrame(data)
             else:
                 self.data = data
-        #function has a raw for each function while function_flat is a 
-        #multiindex pd.Series where first level is the function name 
-        #and the second is the parameters name 
+
+        # handle function reading
         if(isinstance(function, dict)):
             if flag == "read_json_file":
                 self.function = pd.DataFrame(**function)
             else:
                 self.function = pd.DataFrame(function)
         else:
-            self.function = function
-
+            # if self.function is present replace it only if function!=None
+            if function is not None:
+                self.function = function
+            else:
+                if("function" not in dir(self)):
+                    self.function = function
+                    print("notin self")
+                    
+        # create self.function_flat
         if self.function is not None:
             self.function_flat = flatten_function(self.function)
         else:
@@ -279,8 +294,7 @@ class Event:
 
         return pd.concat([s,self.function_flat])
 
-
-    def get_data(self,filename,header = "Fityk"):
+    def get_data(self,filename,header = "fityk"):
         """
         Read a file containing data in columns. A header can be specified.
         
@@ -289,19 +303,23 @@ class Event:
         filename: str
             Input file
         header: 
-            Build header in "Fityk" format or as pandas.read_table 
+            Build header in predefined formats or as pandas.read_table
+            Accepted predefined:
+                - "fityk" 
+                - "casaxps" 
 
         """
 
-        #read the data file. Except the case in which the header tipe is wrong. "Fityk" also falls in this case 
+        #read the data file. Except the case in which the header tipe is wrong. "fityk" also falls in this case 
         try:
             df = pd.read_table(filename,header = header,sep = " ")
-
         except ValueError:
-
-            df = pd.read_table(filename,header = None,sep = " ")
-            if(header == "Fityk"):
-                   df.columns = ["x","y"] + [f"f{i}" for i in range(df.columns.size - 3)] + ["ftot"]
+            if(header == "fityk"):
+                df = pd.read_table(filename,header = None,sep = " ")
+                df.columns = ["x","y"] + [f"f{i}" for i in range(df.columns.size - 3)] + ["ftot"]
+            elif(header == "casaxps"):
+                df, funcs = read_casaxps(filename)
+                self.function = funcs
             else:
                 print("Wrong header format. None is considered.")
         self.data = df
@@ -439,42 +457,3 @@ class Event:
 
 
         return f"Name: {self.name}\nAttributes: {self.attributes}" + f
-
-
-
-def main():
-    filename = 'tests/RBM_P02:1:4.dat'
-    filename2 = 'tests/RBM_P02:1:4.peaks'
-    ev = Event(filename)
-    ev.read_fityk(filename2)
-    names = ev.function.fname
-
-    ev.rename_data_columns()
-
-    # print(ev.data)
-    # bg, labs = background(ev.data)
-    plot_event(ev.data)
-    plt.show()
-    # print(ev.data.filter(regex = "bg"))
-
-
-    # plt.figure()
-    # plt.plot(ev.data.bg_tot)
-    # plt.plot(ev.data.Bg1)
-    # plt.plot(ev.data.Bg2)
-    # plt.figure()
-    # plt.plot(ev.data.bg_tot - ev.data.Bg1 - ev.data.Bg2)
-    # plt.plot(ev.data.bg_tot - ev.data.bg_tot)
-    # plt.show()
-
-    # print(ev.data.x,"\n",ev.normalize().x)
-
-
-
-# if __name__ == '__main__':
-#     filename = 'tests/Spot1_G_P00.dat'
-#     filename2 = 'tests/Spot1_G_P00.peaks'
-#     ev = Event(filename)
-#     ev.read_fityk(filename2)
-#     print(ev.function.columns)
-#     print(ev.data.columns)
