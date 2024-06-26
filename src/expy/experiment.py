@@ -100,7 +100,7 @@ class Experiment(dict):
     # Loaders
     # -----------------------------------------------------------------
 
-    def load_data(self, files, folder = True, extension = "", header = "Fityk"):
+    def load_data(self, files, folder = True, extension = "", header = "fityk"):
         """
         Create events for each file.
 
@@ -112,7 +112,7 @@ class Experiment(dict):
             if True the string will be consider as a folder, otherwise as a file 
         extension: str, default = ""
             can specify the file extension when files is a folder name 
-        header: str, default = Fityk
+        header: str, default = fityk
             can specify the header format to pass to load_data
 
         """

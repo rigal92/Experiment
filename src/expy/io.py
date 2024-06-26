@@ -44,9 +44,7 @@ def read_event(dic, flag = None):
 
     flag: str or None, default = None
         Argument passed to Event constructor. Handles special cases.
-        Accepted values:
-        - "read_json_file": handles the creation of the DataFrames 
-          stored in the json experiment file 
+        See Event for allowed values 
     Returns
     --------------------------
     Event
@@ -75,3 +73,5 @@ def get_notebook_template(folder = "./"):
         print("Warning!", path, "already exists. Skipping this file.")
     else:
         shutil.copyfile(os.path.join(ROOT_DIR, "jupyter/LabNotes.md"), path)
+
+
