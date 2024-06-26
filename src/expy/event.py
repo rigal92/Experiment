@@ -111,7 +111,6 @@ class Event:
             else:
                 if("function" not in dir(self)):
                     self.function = function
-                    print("notin self")
                     
         # create self.function_flat
         if self.function is not None:
@@ -311,17 +310,17 @@ class Event:
         """
 
         #read the data file. Except the case in which the header tipe is wrong. "fityk" also falls in this case 
-        try:
-            df = pd.read_table(filename,header = header,sep = " ")
-        except ValueError:
-            if(header == "fityk"):
-                df = pd.read_table(filename,header = None,sep = " ")
-                df.columns = ["x","y"] + [f"f{i}" for i in range(df.columns.size - 3)] + ["ftot"]
-            elif(header == "casaxps"):
-                df, funcs = read_casaxps(filename)
-                self.function = funcs
-            else:
-                print("Wrong header format. None is considered.")
+        if(header == "fityk"):
+            df = pd.read_table(filename,header = None,sep = " ")
+            df.columns = ["x","y"] + [f"f{i}" for i in range(df.columns.size - 3)] + ["ftot"]
+        elif(header == "casaxps"):
+            df, funcs = read_casaxps(filename)
+            self.function = funcs
+        else:
+            try:
+                df = pd.read_table(filename,header = header,sep = " ")
+            except ValueError:
+                    print("Wrong header format. None is considered.")
         self.data = df
 
     def read_fityk(self,filename, errors = True):

@@ -129,7 +129,7 @@ class Experiment(dict):
             #strip the file name and create an event with the name 
             name = strip_path(f)
             if(name not in self):
-                ev = Event(f)
+                ev = Event(f, header = header)
                 self[ev.name] = ev
             else:
                 self[name].get_data(f,header = header)
