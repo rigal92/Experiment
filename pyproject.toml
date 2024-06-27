@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "experiment"
-version = "2.2.0"
+version = "2.2.1"
 dependencies = ["numpy","pandas","scimate", "scipy"]
 authors = [
   { name="Riccardo Galafassi", email="rigal@live.it" },
