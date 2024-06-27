@@ -328,8 +328,10 @@ class Event:
         else:
             try:
                 df = pd.read_table(filename, header=header, **kwargs)
-            except ValueError:
-                    print("Wrong header format. None is considered.")
+            except ValueError as er:
+                    # print("Wrong header format. None is considered.")
+                    print(er)
+                    return
         self.data = df
 
     def read_fityk(self,filename, errors = True):
