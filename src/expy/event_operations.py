@@ -124,7 +124,17 @@ def read_casaxps(file):
 
     with open(file) as f:
         next(f)
-        next(f)
+        
+        #get additional attributes
+        pars = next(f).strip().split("\t")
+        attributes = {}
+        for i in ['Characteristic Energy eV', 'Acquisition Time s']:
+            try:
+                attributes[i] = float(pars[pars.index(i)+1])    
+            except:
+                pass
+
+
         d = {}
         for i in f:
             if(i.startswith("K.E.")):
@@ -141,6 +151,11 @@ def read_casaxps(file):
     data = pd.read_table(file, skiprows=len(d)+2).dropna(axis=1)
     c = data.columns
     data.columns = map(str.replace, c, "."*len(c), "_"*len(c))
+    # remove CPS columns
+    data = data.loc[:,:"B_E_"] 
+    # renaming and moving useful columns
+    data = data.rename(columns = {"Counts":"y", "Envelope":"ftot", "B_E_":"x"})
+    data.insert(0, "x",data.pop("x"))
 
-    return data, funcs
+    return data, funcs, attributes
 

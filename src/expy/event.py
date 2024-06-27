@@ -86,10 +86,9 @@ class Event:
 
         # handle data reading
         if(isinstance(data,str)):
-            self.get_data(data, header=header, **kwargs)
-            #remove file folder path and file type
             self.name = strip_path(data)
             self.attributes = tokenize(self.name)
+            self.get_data(data, header=header, **kwargs)
         else:
             self.name = name
             self.attributes = attributes
@@ -322,8 +321,10 @@ class Event:
             df.columns = ["x","y"] + [f"f{i}" for i in range(df.columns.size - 3)] + ["ftot"]
         elif(header == "casaxps"):
             check_kwargs(header)            
-            df, funcs = read_casaxps(filename)
+            df, funcs, attributes = read_casaxps(filename)
             self.function = funcs
+            for key, val in attributes.items():
+                self.attributes[key] = val
         else:
             try:
                 df = pd.read_table(filename, header=header, **kwargs)
