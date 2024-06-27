@@ -37,7 +37,7 @@ def plot_event(
         keywords.
         - Missing keys will be assigned to None values
         - None or empty dictionary will not normalize the data
-    bg: str (regular expression), default: None
+    bg_pattern: str (regular expression), default: None
         - if **str** finds background columns matching the string 
         (see event_operations.background)
         - if **None** no bg substraction
