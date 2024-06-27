@@ -63,7 +63,7 @@ class Event:
     """
     Event class gathering in a dictionary the data and fit results
     """
-    def __init__(self, data = None, name = None, attributes = None, function = None, tokenby = "_", flag = None, header = "fityk"):
+    def __init__(self, data = None, name = None, attributes = None, function = None, tokenby = "_", flag = None, header = "fityk", **kwargs):
         """
         Input
         -----------------------------------------------------------------
@@ -79,11 +79,14 @@ class Event:
               stored in the json experiment file 
         header: str, default = fityk
             can specify the header format to pass to load_data
+        **kwargs:
+            keyword arguments for custom reading of data. 
+            See pandas.read_table for accepted values.
         """
 
         # handle data reading
         if(isinstance(data,str)):
-            self.get_data(data, header=header)
+            self.get_data(data, header=header, **kwargs)
             #remove file folder path and file type
             self.name = strip_path(data)
             self.attributes = tokenize(self.name)
@@ -236,7 +239,6 @@ class Event:
             if verbose: print(f"WARNING! {self.name} does not contain any functions. Ignored when creating the function table")
             return pd.DataFrame()
             
-            
         if(extra is None):
             return self.function
 
@@ -293,7 +295,7 @@ class Event:
 
         return pd.concat([s,self.function_flat])
 
-    def get_data(self,filename,header = "fityk"):
+    def get_data(self,filename,header = "fityk", **kwargs):
         """
         Read a file containing data in columns. A header can be specified.
         
@@ -306,19 +308,25 @@ class Event:
             Accepted predefined:
                 - "fityk" 
                 - "casaxps" 
+        kwargs:
+            keyword arguments passed to pandas.read_table
 
         """
-
+        def check_kwargs(header):
+            if(len(kwargs)>0):
+                print(f"WARNING! keyword arguments passed for custom header: {header}. Ignoring arguments.")
         #read the data file. Except the case in which the header tipe is wrong. "fityk" also falls in this case 
         if(header == "fityk"):
-            df = pd.read_table(filename,header = None,sep = " ")
+            check_kwargs(header)            
+            df = pd.read_table(filename,header=None,sep=" ")
             df.columns = ["x","y"] + [f"f{i}" for i in range(df.columns.size - 3)] + ["ftot"]
         elif(header == "casaxps"):
+            check_kwargs(header)            
             df, funcs = read_casaxps(filename)
             self.function = funcs
         else:
             try:
-                df = pd.read_table(filename,header = header,sep = " ")
+                df = pd.read_table(filename, header=header, **kwargs)
             except ValueError:
                     print("Wrong header format. None is considered.")
         self.data = df
