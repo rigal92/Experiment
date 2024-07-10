@@ -153,11 +153,14 @@ def plot_event(
 
 def plot_stack(
         experiment,
-        factor = 1,
+        #plot labels
         labels = None,
         labels_format = None,
         xlabels = 1.01,
         ylabels_shift = 0,
+        #shifting
+        shift = 0,
+        factor = 1,
         #sorting
         sort = None,
         reverse = False,
@@ -233,7 +236,7 @@ def plot_stack(
             bg_pattern = bg_pattern,
             to_background = to_background,
             axes = ax,
-            shift = i * factor,
+            shift = i*factor + shift,
             y_plot= y_plot,
             ftot_plot= ftot_plot,
             other_plot= other_plot,
@@ -242,7 +245,7 @@ def plot_stack(
             **kwargs
             )
         if(not isinstance(labels,type(None))):
-            ax.text(xlabels, i*factor + ylabels_shift, labels[i], transform = ax.get_yaxis_transform())
+            ax.text(xlabels, i*factor + shift + ylabels_shift, labels[i], transform = ax.get_yaxis_transform())
     return ax
 
 
