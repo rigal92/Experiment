@@ -145,8 +145,11 @@ def read_casaxps(file):
             except ValueError:
                 pass
             d[pars[0]]=pars[1:]
-    funcs = pd.DataFrame(d)
-    funcs = funcs.rename(columns={"Name":"fname"})
+    if any(d.values()):
+        funcs = pd.DataFrame(d)
+        funcs = funcs.rename(columns={"Name":"fname"})
+    else:
+        funcs = None
     
     data = pd.read_table(file, skiprows=len(d)+2).dropna(axis=1)
     c = data.columns
