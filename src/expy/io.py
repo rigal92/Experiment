@@ -1,6 +1,7 @@
 import json 
 import pickle
 import os
+import pandas as pd
 
 from expy import Experiment, Event
 
@@ -73,5 +74,24 @@ def get_notebook_template(folder = "./"):
         print("Warning!", path, "already exists. Skipping this file.")
     else:
         shutil.copyfile(os.path.join(ROOT_DIR, "jupyter/LabNotes.md"), path)
+
+
+def read_fullprof_prf(filename, header = 4, **kargs):
+    """
+    Read fullprof prf file.
+    
+    Input
+    -----------------------------------------------------------------
+    filename, str
+        name of the file
+    header, 
+        format of the header as for pandas read_table
+    **kargs:
+        other keyword args to be passed to pandas read_table
+
+    """
+    df = pd.read_table(filename, header = header)
+    df.Yobs = pd.to_numeric(df.Yobs, errors="coerce")
+    return df.dropna(how="any", subset = "Yobs", axis = 0).dropna(axis = 1)
 
 
