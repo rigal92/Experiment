@@ -92,6 +92,8 @@ def read_fullprof_prf(filename, header = 4, **kargs):
     """
     df = pd.read_table(filename, header = header)
     df.Yobs = pd.to_numeric(df.Yobs, errors="coerce")
-    return df.dropna(how="any", subset = "Yobs", axis = 0).dropna(axis = 1)
+    df = df.dropna(how="any", subset = "Yobs", axis = 0).dropna(axis = 1)
+    df.columns = map(str.strip, df.columns)
+    return df
 
 
