@@ -16,6 +16,6 @@ if __name__ == '__main__':
     # plot_stack(ex, shift = 8, factor = 2,  bg_pattern = None, ftot_plot = None)
     # plt.show()
     df = read_fullprof_prf(filename5)
-    print(df.columns)
+    print(df.dtypes)
     # print(ev2.data)
 
