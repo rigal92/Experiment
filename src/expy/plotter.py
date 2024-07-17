@@ -26,17 +26,22 @@ def plot_event(
 
     Input
     -----------------------------------------------------------------
-    data: pandas.DataFrame
-        data to plot
+    data: pandas.DataFrame or Event
+        data to plot.
     x : str, default "x"
         Variable for x axis
-    normalized: dict or None, default: {"ref":"y", "exclude":"x"}
-        Dictionary with the keywords for normalization. Only **ref**
-        and **exclude** keywords are useful. 
+    normalized: str, list, dict or None, default: {"ref":"y", "exclude":"x"}
+        Instruction for the normalization of the spectra. If a string 
+        or a list of strings is given the variable **x** will not be 
+        included in the normalization. The str or list values will 
+        select the columns to use to normalize. 
+        If a dictionary is passed we can explicit the column names 
+        to exclude in the normalization. It must contain the keys 
+        **ref** and **exclude** only. 
         See event.Event.normalize for more information on accepted 
         keywords.
         - Missing keys will be assigned to None values
-        - None or empty dictionary will not normalize the data
+        - None will not normalize the data
     bg_pattern: str (regular expression), default: None
         - if **str** finds background columns matching the string 
         (see event_operations.background)
@@ -109,9 +114,18 @@ def plot_event(
 
 
     #normalize
-    if(normalized):
-        ref = normalized.get("ref")
-        exclude = normalized.get("exclude")
+    if(normalized is not None):
+        if (isinstance(normalized, dict)):
+            if (len(normalized)!=2 or "ref" not in normalized or "exclude" not in normalized):
+                raise TypeError("Abnormal normalization dictionary. The dictionary must contain all and only the keywords ref and exclude.")
+            else:
+                ref = normalized.get("ref")
+                exclude = normalized.get("exclude")
+        elif(isinstance(normalized, (str,list))):
+            ref = normalized
+            exclude = x
+        else:
+            raise TypeError("Invalide type for normalization.")
         df = normalize(df, ref = ref, exclude = exclude)
     if(shift):
         df.loc[:,df.columns != x] += shift
