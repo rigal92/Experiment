@@ -36,7 +36,7 @@ def normalize(data,ref = "y",exclude = "x"):
         cols = df.columns
     else:
         if(not isinstance(exclude,list)):
-            exclude = list(exclude)
+            exclude = [exclude]
         cols = ~df.columns.isin(exclude)
 
     df.loc[:,cols] = mt.normalize(df.loc[:,cols],ref)
