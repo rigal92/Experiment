@@ -11,7 +11,7 @@ from .support import strip_path
 from .plotter import plot_event
 from .event_operations import *
 
-def tokenize(string, char = "_"):
+def tokenize_old(string, char = "_"):
     """
     Split the file name in individual tokens that can have important information 
     a special tocken is Pid that is given by a tocken starting with P and followed by a namber 
@@ -33,12 +33,32 @@ def tokenize(string, char = "_"):
     tokens = {}
     count = 0
     for i in s:
-        if(i.startswith("P") and not ("Pid" in tokens)):
+        if(pressure and i.startswith("P") and not ("Pid" in tokens)):
             tokens["Pid"] = i
         else:
             tokens[f"T{count + 1}"] = i
             count +=1
     return tokens
+
+def tokenize(string, char = "_"):
+    """
+    Split the file name in individual tokens that can have important information 
+    
+    Input
+    -----------------------------------------------
+    string:str
+        Input string to tokenize
+    char: str
+        Character used to split
+
+    Output
+    -----------------------------------------------
+    dict
+        Dictionary of the tokens
+
+    """
+    s = string.split(char)
+    return {f"T{i + 1}":t for i,t in enumerate(s)}
 
 def flatten_function(data):
     """Create a flatten version of a function DataFrame."""
