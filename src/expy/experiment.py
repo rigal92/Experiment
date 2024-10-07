@@ -26,9 +26,9 @@ class Experiment(dict):
             type dict. The dictionary must contain only Event values.
 
         """
+        super().__init__({})
         if len(args) == 0:
             self.name = name
-            super().__init__({})
             self.functions = None
             self.functions_flat = None
         elif len(args) == 1:
@@ -36,7 +36,8 @@ class Experiment(dict):
             if isinstance(data, dict):
                 if all(isinstance(e, Event) for e in data.values()):
                     self.name = name
-                    super().__init__(data)
+                    for i,ev in data.items():
+                        self[i] = ev
                     self.tidy_functions()
                 else:
                     raise TypeError("""Unsupported data type passed when calling
