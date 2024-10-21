@@ -19,6 +19,7 @@ def plot_event(
         other_plot = {"_rem":{"pos":["-"],"c":[0,.3957,.6043], "alpha":.3}},
         xlim = None,
         ylim = None,
+        plot_function = "plot",
         **kwargs
         ):
     """
@@ -79,6 +80,11 @@ def plot_event(
             all the points where the column y is bigger than the 
             maximum value of the column f1 in the range 1000:2000
             are excluded  
+    plot_function: str, default: "plot"
+        Function name to be used to plot the data. The function is passed 
+        as a string with the name of the function. The function 
+        needs to belong to matplotlib axes. The default function 
+        is ax.plot.
     kwargs:
         keywords to be passed to plt.plot
 
@@ -137,14 +143,14 @@ def plot_event(
         axes = plt.axes()
 
     x = df.pop(x)
-    
 
+    f_plot = getattr(axes, plot_function)    
     if(y_plot is not None):
         var= deepcopy(y_plot)
-        axes.plot(x, df.pop("y"),*var.pop("pos",[]),**var,**kwargs)
+        f_plot(x, df.pop("y"),*var.pop("pos",[]),**var,**kwargs)
     if(ftot_plot is not None):
         var= deepcopy(ftot_plot)
-        axes.plot(x, df.pop("ftot"),*var.pop("pos",[]),**var,**kwargs)
+        f_plot(x, df.pop("ftot"),*var.pop("pos",[]),**var,**kwargs)
     if(other_plot is not None):
         var = deepcopy(other_plot)
         if("_rem" not in list(df)):
@@ -154,11 +160,13 @@ def plot_event(
             remaining = None
         for key,value in var.items():
             sel = df.filter(regex = key)
-            axes.plot(x, sel,*value.pop("pos",[]),**value,**kwargs)
+            for _,col in sel.items():
+                f_plot(x, col,*value.pop("pos",[]),**value,**kwargs)
             for i in set(sel.columns):
                 df.pop(i)
         if(remaining is not None):
-            axes.plot(x, df,*remaining.pop("pos",[]),**remaining,**kwargs)
+            for _,col in df.items():
+                f_plot(x, col,*remaining.pop("pos",[]),**remaining,**kwargs)
 
     return axes
 
@@ -191,6 +199,7 @@ def plot_stack(
         other_plot = {"_rem":{"pos":["-b"],"alpha":.3}},
         xlim = None,
         ylim = None,
+        plot_function = "plot",
         **kwargs
         ):
     """
