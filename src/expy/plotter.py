@@ -160,14 +160,15 @@ def plot_event(
             remaining = None
         for key,value in var.items():
             sel = df.filter(regex = key)
+            pos = value.pop("pos",[])
             for _,col in sel.items():
-                f_plot(x, col,*value.pop("pos",[]),**value,**kwargs)
+                f_plot(x, col,*pos,**value,**kwargs)
             for i in set(sel.columns):
                 df.pop(i)
         if(remaining is not None):
+            pos = remaining.pop("pos",[])
             for _,col in df.items():
-                f_plot(x, col,*remaining.pop("pos",[]),**remaining,**kwargs)
-
+                f_plot(x, col,*pos,**remaining,**kwargs)
     return axes
 
 
