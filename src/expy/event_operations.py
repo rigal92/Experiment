@@ -77,9 +77,9 @@ def background_dep(data, pattern = "Bg"):
     return bg
 
 
-def background(data, pattern = "Bg",drop = False):
+def background(data, pattern = "Bg", drop = False):
     """
-    Adds a background column to the data matching the **pattern**
+    Creates a background matching data columns to the **pattern**
 
     Input
     -----------------------------------------------------------------

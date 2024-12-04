@@ -95,9 +95,12 @@ def plot_event(
 
     #remove bg
     if(bg_pattern):
-        bg, labels = background(df,bg_pattern)
-        if(drop_bg == True):
-            df.drop(labels, axis = 1, inplace = True)
+        if(isinstance(bg_pattern,(int,float))):
+            bg = bg_pattern
+        else:
+            bg, labels = background(df,bg_pattern)
+            if(drop_bg == True):
+                df.drop(labels, axis = 1, inplace = True)
         if(to_background is None):
             #select all columns apart for x
             to_background = list(filter(lambda y:y!=x, df.columns))

@@ -189,8 +189,8 @@ class Event:
         Input
         -----------------------------------------------------------------
         pattern: str or list, default "bg"
-            Selects the columns matching pattern using re.match. If pattern is a list of 
-            strings all the elements will be matched 
+            Selects the columns matching pattern using re.match. If pattern 
+            is a list of strings all the elements will be matched 
         col_name: str
             name of the new background column
         """
