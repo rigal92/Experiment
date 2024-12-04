@@ -3,8 +3,6 @@ import pandas as pd
 from .event_operations import *
 from copy import deepcopy
 
-
-# metti none per others come opzione per non plottarli 
 def plot_event(
         data,
         x = "x",
@@ -12,6 +10,7 @@ def plot_event(
         normalized = {"ref":"y", "exclude":"x"}, 
         bg_pattern = None,
         to_background = ["y","ftot"],
+        drop_bg = True,
         shift = 0,
         #plotting parameters
         axes = None,
@@ -29,7 +28,7 @@ def plot_event(
     -----------------------------------------------------------------
     data: pandas.DataFrame
         data to plot
-    x : str or None, default "x"
+    x : str, default "x"
         Variable for x axis
     normalized: dict or None, default: {"ref":"y", "exclude":"x"}
         Dictionary with the keywords for normalization. Only **ref**
@@ -38,13 +37,15 @@ def plot_event(
         keywords.
         - Missing keys will be assigned to None values
         - None or empty dictionary will not normalize the data
-    bg: str (regular expression), default: None
+    bg_pattern: str (regular expression), default: None
         - if **str** finds background columns matching the string 
         (see event_operations.background)
         - if **None** no bg substraction
     to_background: None, str or list, default: ["y","ftot"]
         Column names to which the background will be substracted.
         None value will affect all the columns
+    drop_bg: Bool, default: True
+        avoid drawing columns used for the background substraction 
     shift: float, default: 0
         allowes for shifting the spectrum of **shift**
     y_plot: dict or None, default: {"positionals":[".k"], "ms":2}
@@ -83,10 +84,15 @@ def plot_event(
 
     #remove bg
     if(bg_pattern):
-        bg, labels = background(df,bg_pattern)
-        df.drop(labels, axis = 1, inplace = True)
-        if(not to_background):
-            to_background = df.columns
+        if(isinstance(bg_pattern,(int,float))):
+            bg = bg_pattern
+        else:
+            bg, labels = background(df,bg_pattern)
+            if(drop_bg == True):
+                df.drop(labels, axis = 1, inplace = True)
+        if(to_background is None):
+            #select all columns apart for x
+            to_background = list(filter(lambda y:y!=x, df.columns))
         df[to_background] = df[to_background].sub(bg,axis = 0)
     #manage x limits
     if(xlim):
@@ -148,15 +154,22 @@ def plot_event(
 
 
 
-def plot_stack(experiment,
-        x = "x",
-        normalized = {"ref":"y", "exclude":"x"}, 
-        bg_pattern = "Bg",
-        to_background = ["y","ftot"],
+def plot_stack(
+        experiment,
         factor = 1,
+        labels = None,
+        labels_format = None,
+        xlabels = 1.01,
+        ylabels_shift = 0,
         #sorting
         sort = None,
         reverse = False,
+        x = "x",
+        #data edit
+        normalized = {"ref":"y", "exclude":"x"}, 
+        bg_pattern = "Bg",
+        to_background = ["y","ftot"],
+        drop_bg = True,
         #plotting
         ax = None,
         y_plot = {"pos":[".k"], "ms":2}, 
@@ -166,10 +179,53 @@ def plot_stack(experiment,
         ylim = None,
         **kwargs
         ):
+    """
+    Stack plot of the events. Only the parameters specific to plot_stack
+    are described. For the other inputs see plot_event.
+    Inputs
+    -----------------------------------------------------------------
+    experiment: expy.Experiment
+        the experiment to plot
+    factor: float, default:1
+        multiplication factor to shift the data
+    labels: str, list or None, default: None
+        if different from None it adds text at each plot edge.  
+        Accepted values:
+        - str indicating the attribute name to use
+        - list of string. It must be of the same length of experiment.
+          Sorting will not affect this list  
+    labels_format: str or None, default: None
+        formats labels using format. egs: labels_format='.2f'
+    xlabels: fload, default: 1.01
+        x postition of the labels in axes coordinates. 1.01 is on the 
+        outside of the edge on the right side
+    ylabels_shift: float, default: 0
+        y shift of each label from the 0 of the plots 
+    sort: function or None, default: None
+        key to be passed to sorted for custom sorting of the plots
+    reverse: bool, default:False
+        allows to reverse the order of sort
+
+    """
     
 
     if (sort):
-        experiment = dict(sorted(experiment.items(), key = sort, reverse = reverse))
+        experiment = experiment.sort(key = sort, reverse = reverse)
+    if(isinstance(labels, str)):
+        try:
+            labels = experiment.get_attributes()[labels]
+        except KeyError:
+            print(f"KeyError: No attibutes named {labels} available. Skipping stack plot labelling.")
+            labels = None
+    elif(isinstance(labels, list)):
+        if len(labels) != len(experiment):
+            raise ValueError("the length of labels is not matching the length of experiment.")
+    if labels_format and (not isinstance(labels, type(None))):
+        try:
+            labels = list(map(format, labels, [labels_format]*len(labels)))
+        except:
+            print("Warning! Formatting of the labels was not possible. Skipping.")
+
 
     if (not ax):
         ax = plt.axes()
@@ -188,6 +244,8 @@ def plot_stack(experiment,
             ylim = ylim,
             **kwargs
             )
+        if(not isinstance(labels,type(None))):
+            ax.text(xlabels, i*factor + ylabels_shift, labels[i], transform = ax.get_yaxis_transform())
     return ax
 
 

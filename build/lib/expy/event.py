@@ -40,21 +40,8 @@ def tokenize(string, char = "_"):
             count +=1
     return tokens
 
-def read_event(dic):
-    """
-    Parse keywords from a dictionary and creates an event.
-    """
-    ev = Event()
-    ev.name = dic.get("name")
-    ev.attributes = dic.get("attributes")
-    ev.function = pd.DataFrame(dic.get("function"))
-    ev.data = pd.DataFrame(dic.get("data"))
-    return ev
-
 def flatten_function(data):
-    """
-    Create a flatten version of df. 
-    """
+    """Create a flatten version of a function DataFrame."""
     df = data.copy()
     names = df.fname 
     #rename duplicates to avoid conlicts adding _n if more then one occurence where n is the occurrence index 
@@ -72,14 +59,11 @@ def flatten_function(data):
 
 
 
-
-
- 
 class Event:
     """
     Event class gathering in a dictionary the data and fit results
     """
-    def __init__(self, data = None,tokenby = "_"):
+    def __init__(self, data = None, name = None, attributes = None, function = None, tokenby = "_", flag = None):
         """
         Input
         -----------------------------------------------------------------
@@ -95,14 +79,30 @@ class Event:
             self.name = strip_path(data)
             self.attributes = tokenize(self.name)
         else:
-            self.name = None
-            self.attributes = None
-            self.data = data
+            self.name = name
+            self.attributes = attributes
+            if(isinstance(data, dict)):
+                if flag == "read_json_file":
+                    self.data = pd.DataFrame(**data)
+                else:
+                    self.data = pd.DataFrame(data)
+            else:
+                self.data = data
         #function has a raw for each function while function_flat is a 
         #multiindex pd.Series where first level is the function name 
         #and the second is the parameters name 
-        self.function = None
-        self.function_flat = None
+        if(isinstance(function, dict)):
+            if flag == "read_json_file":
+                self.function = pd.DataFrame(**function)
+            else:
+                self.function = pd.DataFrame(function)
+        else:
+            self.function = function
+
+        if self.function is not None:
+            self.function_flat = flatten_function(self.function)
+        else:
+            self.function_flat = None
 
 
     # -----------------------------------------------------------------
@@ -153,8 +153,8 @@ class Event:
         Input
         -----------------------------------------------------------------
         pattern: str or list, default "bg"
-            Selects the columns matching pattern using re.match. If pattern is a list of 
-            strings all the elements will be matched 
+            Selects the columns matching pattern using re.match. If pattern 
+            is a list of strings all the elements will be matched 
         col_name: str
             name of the new background column
         """
@@ -173,11 +173,12 @@ class Event:
         """
         Rename standard column fityk names to the functions names in self.function
         """
-        names = self.function.get("fname")
-
-        if(isinstance(names,type(None))):
-            print("Names not found. Impossible to rename, consider to add functions.")
+        if(isinstance(self.function,type(None))):
+            print("Functions not found. Impossible to rename, consider to add functions.")
             return
+
+
+        names = self.function.get("fname")
         dic = {}
         for i,val in enumerate(names):
             if(not isinstance(dic.get(val),type(None))):
@@ -189,13 +190,11 @@ class Event:
             self.data.rename(columns= {f"f{i}":val},inplace = True)
 
 
-
-
     # -----------------------------------------------------------------
     # Loaders 
     # -----------------------------------------------------------------
 
-    def get_function_table(self,extra = "all"):
+    def get_function_table(self,extra = "all", verbose = False):
         """
         Return function table where extra columns can be added. 
 
@@ -210,6 +209,8 @@ class Event:
             - str will be match with either self.name or a value in 
               self.attributes. Missing columns will be skipped
             - list as for the point above but for a list of str
+        verbose: bool, default: False
+            print warnings when True 
         Return
         -----------------------------------------------------------------
         pandas.DataFrame:
@@ -218,7 +219,7 @@ class Event:
         """
         #check that self.function contains a function table
         if(self.function is None):
-            print(f"WARNING! {self.name} does not contain any functions. Ignored")
+            if verbose: print(f"WARNING! {self.name} does not contain any functions. Ignored when creating the function table")
             return pd.DataFrame()
             
             
@@ -243,7 +244,7 @@ class Event:
         return df
 
 
-    def get_function_flat(self,extra = "all"):
+    def get_function_flat(self,extra = "all", verbose = False):
         """
         Return function_flat where extra values can be added. See 
         get_function_table for possible inputs
@@ -256,7 +257,7 @@ class Event:
         """
         #check that self.function contains a function table
         if(self.function_flat is None):
-            print(f"WARNING! {self.name} does not contain any functions. Ignored")
+            if verbose: print(f"WARNING! {self.name} does not contain any functions. Ignored when creating the function table")
             return pd.Series()
             
             
@@ -392,23 +393,52 @@ class Event:
     # Input/output
     # -----------------------------------------------------------------
 
+    def to_json(self, **args):
+        """
+        Convert the event into a json formatted string.
 
-    def to_json(self):
-        return json.dumps(self.to_dict())
+        Input
+        --------------------------
+        **args
+            keyword arguments to be passed to json.dumps 
+
+        """
+        return json.dumps(self.to_dict(), **args)
 
     # -----------------------------------------------------------------
     # Conversions
     # -----------------------------------------------------------------
 
-    def to_dict(self):
+    def to_dict(self, orient = "split"):
+        """
+        Convert event into a dictionary. Used to save the event in experiment.
+        Input
+        --------------------------
+        orient: str, default="split"
+            argument passed to to_dict function of pandas DataFrames. "split"
+            allows to preserve the index type when saving into a json file
+        Return
+        --------------------------
+        dict
+            dictionary with all the relevant element of the Event
+        """
         dic = {
             "name":self.name,
             "attributes":self.attributes,
-            "function":self.function.to_dict() if isinstance(self.function,pd.DataFrame) else self.function,
-            "data":self.data.to_dict() if isinstance(self.data,pd.DataFrame) else self.data
-
+            "function":self.function.to_dict(orient = orient) if isinstance(self.function,pd.DataFrame) else self.function,
+            "data":self.data.to_dict(orient = orient) if isinstance(self.data,pd.DataFrame) else self.data
         }
         return dic
+
+    def __repr__(self):
+        #if functions have been added join them in the printing
+        if(self.function is not None):
+            f = f"\nFunctions: {self.function.fname.to_list()}"
+        else:
+            f = ""
+
+
+        return f"Name: {self.name}\nAttributes: {self.attributes}" + f
 
 
 
