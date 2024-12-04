@@ -105,3 +105,57 @@ def background(data, pattern = "Bg", drop = False):
 
     return (bg, columns)
 
+
+def read_casaxps(file):
+    """
+    Read file as a casaxps ASCII file.
+    
+    Inputs
+    -----------------------------------------------------------------
+    file: str
+        file name
+    Returns
+    -----------------------------------------------------------------
+    tuple
+        tuple of pd.DataFrame with the data and the functions tables
+        (data, function)
+
+    """
+
+    with open(file) as f:
+        next(f)
+        
+        #get additional attributes
+        pars = next(f).strip().split("\t")
+        attributes = {}
+        for i in ['Characteristic Energy eV', 'Acquisition Time s']:
+            try:
+                attributes[i] = float(pars[pars.index(i)+1])    
+            except:
+                pass
+
+
+        d = {}
+        for i in f:
+            if(i.startswith("K.E.")):
+                break        
+            pars = i.strip().replace("\t\t","\t").split("\t")
+            try:
+                pars[1:] = [float(i) for i in pars[1:]]
+            except ValueError:
+                pass
+            d[pars[0]]=pars[1:]
+    funcs = pd.DataFrame(d)
+    funcs = funcs.rename(columns={"Name":"fname"})
+    
+    data = pd.read_table(file, skiprows=len(d)+2).dropna(axis=1)
+    c = data.columns
+    data.columns = map(str.replace, c, "."*len(c), "_"*len(c))
+    # remove CPS columns
+    data = data.loc[:,:"B_E_"] 
+    # renaming and moving useful columns
+    data = data.rename(columns = {"Counts":"y", "Envelope":"ftot", "B_E_":"x"})
+    data.insert(0, "x",data.pop("x"))
+
+    return data, funcs, attributes
+

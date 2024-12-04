@@ -100,7 +100,7 @@ class Experiment(dict):
     # Loaders
     # -----------------------------------------------------------------
 
-    def load_data(self, files, folder = True, extension = "", header = "Fityk"):
+    def load_data(self, files, folder = True, extension = "", header = "fityk", **kwargs):
         """
         Create events for each file.
 
@@ -112,9 +112,11 @@ class Experiment(dict):
             if True the string will be consider as a folder, otherwise as a file 
         extension: str, default = ""
             can specify the file extension when files is a folder name 
-        header: str, default = Fityk
-            can specify the header format to pass to load_data
-
+        header: str, default = fityk
+            can specify the header format to pass to Event.get_data
+        **kwargs:
+            keyword arguments to pass to read custom data structures. 
+            See pandas.read_table for accepted values.
         """
         if(folder):
             #lists files if a folder is given instead of a list of files
@@ -129,10 +131,10 @@ class Experiment(dict):
             #strip the file name and create an event with the name 
             name = strip_path(f)
             if(name not in self):
-                ev = Event(f)
+                ev = Event(f, header = header, **kwargs)
                 self[ev.name] = ev
             else:
-                self[name].get_data(f,header = header)
+                self[name].get_data(f,header = header, **kwargs)
 
     def load_peaks(self,files, folder=True, extension=".peaks", errors=True, rename_data_columns=True):
         """
