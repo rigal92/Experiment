@@ -7,42 +7,15 @@ import re
 import scimate.mathtools as mt
 
 #local imports 
-from .support import strip_path
+from .support import strip_path, accept_event_flags
 from .plotter import plot_event
 from .event_operations import *
 
-def tokenize_old(string, char = "_"):
+def tokenize(string, char = "_", pid = False):
     """
-    Split the file name in individual tokens that can have important information 
-    a special tocken is Pid that is given by a tocken starting with P and followed by a namber 
-
-    Input
-    -----------------------------------------------
-    string:str
-        Input string to tokenize
-    char: str
-        Character used to split
-
-    Output
-    -----------------------------------------------
-    dict
-        Dictionary of the tokens
-
-    """
-    s = string.split(char)
-    tokens = {}
-    count = 0
-    for i in s:
-        if(pressure and i.startswith("P") and not ("Pid" in tokens)):
-            tokens["Pid"] = i
-        else:
-            tokens[f"T{count + 1}"] = i
-            count +=1
-    return tokens
-
-def tokenize(string, char = "_"):
-    """
-    Split the file name in individual tokens that can have important information 
+    Split the file name in individual tokens that can have important information.
+    Using the flag pid a special tocken is given by a tocken starting with P and 
+    followed by a number 
     
     Input
     -----------------------------------------------
@@ -50,6 +23,9 @@ def tokenize(string, char = "_"):
         Input string to tokenize
     char: str
         Character used to split
+    pid: bool
+        if True trys to pars the Pid if a token is made by the character P 
+        and a number
 
     Output
     -----------------------------------------------
@@ -58,7 +34,15 @@ def tokenize(string, char = "_"):
 
     """
     s = string.split(char)
-    return {f"T{i + 1}":t for i,t in enumerate(s)}
+    d = {f"T{i + 1}":t for i,t in enumerate(s)}
+    if pid:
+        # Check for Pid
+        for key,val in d.items():
+            if(re.match(r"P\d",val)):
+                d.pop(key)
+                d["Pid"] = val
+                break
+    return d
 
 def flatten_function(data):
     """Create a flatten version of a function DataFrame."""
@@ -92,9 +76,10 @@ class Event:
             self.data will be assigned to the DataFrame
         tokenby: str , default is "_"
             Character used by tokenize
-        flag: str or None, default None
+        flag: str, list or None, default None
             Handle special cases
             Accepted values:
+            - "pressure": flag passed to load_data for pressure experiments
             - "read_json_file": handles the creation of the DataFrames 
               stored in the json experiment file 
         header: str, default = fityk
@@ -104,16 +89,18 @@ class Event:
             See pandas.read_table for accepted values.
         """
 
+        flag = accept_event_flags(flag, ["pressure", "read_json_file"])
         # handle data reading
         if(isinstance(data,str)):
             self.name = strip_path(data)
-            self.attributes = tokenize(self.name)
+            pid = "pressure" in flag
+            self.attributes = tokenize(self.name, tokenby, pid)
             self.get_data(data, header=header, **kwargs)
         else:
             self.name = name
             self.attributes = attributes
             if(isinstance(data, dict)):
-                if flag == "read_json_file":
+                if "read_json_file" in flag:
                     self.data = pd.DataFrame(**data)
                 else:
                     self.data = pd.DataFrame(data)
@@ -122,7 +109,7 @@ class Event:
 
         # handle function reading
         if(isinstance(function, dict)):
-            if flag == "read_json_file":
+            if "read_json_file" in flag:
                 self.function = pd.DataFrame(**function)
             else:
                 self.function = pd.DataFrame(function)

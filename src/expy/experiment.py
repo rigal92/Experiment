@@ -5,7 +5,7 @@ import json
 
 #local import
 from expy.event import Event
-from expy.support import strip_path,folder_to_files
+from expy.support import strip_path,folder_to_files,accept_event_flags
 from expy.plotter import plot_stack
 
 sort_key_Pid = lambda x:x[1].attributes["Pid"]
@@ -101,7 +101,7 @@ class Experiment(dict):
     # Loaders
     # -----------------------------------------------------------------
 
-    def load_data(self, files, folder = True, extension = "", header = "fityk", **kwargs):
+    def load_data(self, files, folder = True, extension = "", header = "fityk", flag=None, **kwargs):
         """
         Create events for each file.
 
@@ -115,6 +115,10 @@ class Experiment(dict):
             can specify the file extension when files is a folder name 
         header: str, default = fityk
             can specify the header format to pass to Event.get_data
+        flag: str, list or None, default = None
+            a flag or a list of flags can be passed to handle special cases
+            Accepted values:
+                -"pressure": adds Pid tocken if found
         **kwargs:
             keyword arguments to pass to read custom data structures. 
             See pandas.read_table for accepted values.
@@ -126,13 +130,13 @@ class Experiment(dict):
             #if a single file name is given then make it a list 
             if(isinstance(files, str)):
                 files = [files]
-
+        flag = accept_event_flags(flag, ["pressure"])
 
         for f in files:
             #strip the file name and create an event with the name 
             name = strip_path(f)
             if(name not in self):
-                ev = Event(f, header = header, **kwargs)
+                ev = Event(f, header = header, flag=flag, **kwargs)
                 self[ev.name] = ev
             else:
                 self[name].get_data(f,header = header, **kwargs)
