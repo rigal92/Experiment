@@ -43,9 +43,10 @@ def plot_event(
         keywords.
         - Missing keys will be assigned to None values
         - None will not normalize the data
-    bg_pattern: str (regular expression), default: None
+    bg_pattern: str (regular expression), numeric default: None
         - if **str** finds background columns matching the string 
         (see event_operations.background)
+        - if **numeric** subtract a constant value
         - if **None** no bg substraction
     to_background: None, str or list, default: ["y","ftot"]
         Column names to which the background will be substracted.
@@ -95,9 +96,12 @@ def plot_event(
 
     #remove bg
     if(bg_pattern):
-        bg, labels = background(df,bg_pattern)
-        if(drop_bg == True):
-            df.drop(labels, axis = 1, inplace = True)
+        if(isinstance(bg_pattern,(int,float))):
+            bg = bg_pattern
+        else:
+            bg, labels = background(df,bg_pattern)
+            if(drop_bg == True):
+                df.drop(labels, axis = 1, inplace = True)
         if(to_background is None):
             #select all columns apart for x
             to_background = list(filter(lambda y:y!=x, df.columns))
