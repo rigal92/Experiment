@@ -367,7 +367,7 @@ class Event:
         df.insert(2,"fname",[x.split()[1] for x in df.loc[:,"# PeakType"]])
 
         #split the parameters that are placed all together by Fityk and replace ? by 0 for unknown errors 
-        pars = pd.DataFrame([map(float,x.replace("+/-","").replace("?","0").split()) for x in df.loc[:,"parameters..."]])
+        pars = pd.DataFrame([map(float,x.replace("+/-","").replace("?","0").split()) if isinstance(x, str) else x for x in df.loc[:,"parameters..."]])
         if(errors):
             pars.columns = [f"a{int(i/2)}" if (not i%2) else f"err_a{int(i/2)}" for i in range(len(pars.columns))]
         else:
