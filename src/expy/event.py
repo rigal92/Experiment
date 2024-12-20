@@ -92,7 +92,11 @@ class Event:
         flag = accept_event_flags(flag, ["pressure", "read_json_file"])
         # handle data reading
         if(isinstance(data,str)):
-            self.name = strip_path(data)
+            if name is None:
+                self.name = strip_path(data)
+            else:
+                self.name = name
+
             pid = "pressure" in flag
             self.attributes = tokenize(self.name, tokenby, pid)
             self.get_data(data, header=header, **kwargs)

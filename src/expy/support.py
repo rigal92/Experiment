@@ -1,10 +1,14 @@
 import os 
 
-def strip_path(path):
+def strip_path(path, extension = None):
     """
     remove file path and extension from a filename
     """
-    return path.split("/")[-1].split(".")[0]
+
+    name = path.split("/")[-1]
+    if extension is not None:
+        name = name.removesuffix(extension)
+    return name
 
 
 def folder_to_files(folder,extension):

@@ -134,12 +134,12 @@ class Experiment(dict):
 
         for f in files:
             #strip the file name and create an event with the name 
-            name = strip_path(f)
+            name = strip_path(f, extension=extension)
             if(name not in self):
-                ev = Event(f, header = header, flag=flag, **kwargs)
+                ev = Event(f, name=name, header=header, flag=flag, **kwargs)
                 self[ev.name] = ev
             else:
-                self[name].get_data(f,header = header, **kwargs)
+                self[name].get_data(f,header=header, **kwargs)
 
     def load_peaks(self,files, folder=True, extension=".peaks", errors=True, rename_data_columns=True):
         """
@@ -174,7 +174,7 @@ class Experiment(dict):
 
         not_found = []
         for f in files:
-            name = strip_path(f)
+            name = strip_path(f, extension)
             if(not name in self): 
                 not_found += [name]
 
