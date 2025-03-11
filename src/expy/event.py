@@ -281,11 +281,6 @@ class Event:
             self.function_flat with the eventual added values
 
         """
-        #check that self.function contains a function table
-        if(self.function_flat is None):
-            if verbose: print(f"WARNING! {self.name} does not contain any functions. Ignored when creating the function table")
-            return pd.Series()
-            
             
         if(extra is None):
             return self.function_flat
@@ -303,7 +298,12 @@ class Event:
                 extra = [extra]
             s = pd.Series({(key,""):value for key,value in self.attributes.items() if key in extra})
 
-        return pd.concat([s,self.function_flat])
+        #check that self.function contains a function table
+        if(self.function_flat is None):
+            if verbose: print(f"WARNING! {self.name} does not contain any functions.")
+            return s
+        else:
+            return pd.concat([s,self.function_flat])
 
     def get_data(self,filename,header = "fityk", **kwargs):
         """
