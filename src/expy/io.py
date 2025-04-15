@@ -2,6 +2,8 @@ import json
 import pickle
 import os
 import pandas as pd
+from fityk import Fityk 
+from pyfityk.io import get_data, get_functions
 
 from expy import Experiment, Event
 
@@ -32,6 +34,27 @@ def read(filename):
     ex.tidy_functions()
     return ex
 
+def read_fityk(filename):
+    """
+    Read the Experiment from a Fityk file. 
+    
+    Input
+    ------
+    filename: str
+        name of the file
+    """
+    # initialization
+    ex = Experiment()
+    session = Fityk()
+    session.execute(f"reset; exec {filename}")
+
+    # loop through datasets
+    for i in range(session.get_dataset_count()):
+        ev = read_fityk_event(session, i)
+        ex[ev.name] = ev
+    ex.tidy_functions()
+    return ex
+
 def read_event(dic, flag = None):
     """
     Parse keywords from a dictionary and creates an event.
@@ -59,7 +82,26 @@ def read_event(dic, flag = None):
         else: 
             return None
 
-    ev = Event(**{key:check(key) for key in ["name", "attributes", "data", "function"]}, flag = flag)
+def read_fityk_event(session, dataset):
+    """
+    Reads a dataset in a Fityk session and converts it to an event.
+
+    Input
+    --------------------------
+    session: Fityk
+        Fityk session
+    dataset: int
+        dataset number
+    Returns
+    --------------------------
+    Event
+
+    """
+    name = session.get_info("title", dataset)
+    data = get_data(session, dataset)
+    function = get_functions(session, dataset)
+    function = None if function.empty else function
+    ev = Event(name=name, data=data, function=function)
     return ev
 
 def get_notebook_template(folder = "./"):
