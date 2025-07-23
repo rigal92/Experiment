@@ -1,21 +1,25 @@
 import matplotlib.pyplot as plt
 from expy import Event, Experiment, plot_stack, plot_event, read_fullprof_prf, read_fityk
 from fityk import Fityk
+import time
 if __name__ == '__main__':
     filename = 'tests/on_SiO2_Sputtered_Sn1.txt'
     filename2 = 'tests/SnSe2_100.dat'
     filename3 = 'tests/on_SiO2_C1.txt'
     filename4 = 'tests/8001_5_Survey.txt'
     filename5 = 'tests/SnSe2_Se.prf'
-    filename6 = 'tests/data/fit.fit'
+    filename6 = 'tests/data/fit_fitted.fit'
+    filename7 = 'tests/data/fit.fit'
     # ev = Event(filename, header = "casaxps")
 
-    # f = Fityk()
-    # f.execute(f"reset; exec {filename6}")
+    f = Fityk()
+    t=time.time()
+    # f.execute(f"reset; exec {filename7}")
     ex = read_fityk(filename6)
-    print(ex)
+    # print(ex)
+    print("Time=",time.time()-t)
 
-    ev2 = Event(filename2, header = "fityk")
+    # ev2 = Event(filename2, header = "fityk")
     # print(ev2.function)
     # print(ev2.data)
     # ex = Experiment()

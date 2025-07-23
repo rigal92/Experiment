@@ -47,12 +47,36 @@ def read_fityk(filename):
     ex = Experiment()
     session = Fityk()
     session.execute(f"reset; exec {filename}")
-
+    print("---Script loaded---")
+    import time
     # loop through datasets
     for i in range(session.get_dataset_count()):
         ev = read_fityk_event(session, i)
         ex[ev.name] = ev
     ex.tidy_functions()
+    return ex
+
+def read_fityk_manual(filename):
+    """
+    Read the Experiment from a Fityk file. 
+    
+    Input
+    ------
+    filename: str
+        name of the file
+    """
+    # initialization
+    ex = Experiment()
+    with open(filename) as file:
+        while(file):
+            l = file.readline
+    # print("---Script loaded---")
+    # import time
+    # # loop through datasets
+    # for i in range(session.get_dataset_count()):
+    #     ev = read_fityk_event(session, i)
+    #     ex[ev.name] = ev
+    # ex.tidy_functions()
     return ex
 
 def read_event(dic, flag = None):
