@@ -61,8 +61,6 @@ def flatten_function(data):
 
     return s 
 
-
-
 class Event:
     """
     Event class gathering in a dictionary the data and fit results
@@ -88,26 +86,26 @@ class Event:
             keyword arguments for custom reading of data. 
             See pandas.read_table for accepted values.
         """
-
+        # get flags
         flag = accept_event_flags(flag, ["pressure", "read_json_file"])
         pid = "pressure" in flag
+        json_file = "read_json_file" in flag
+
+        self.name = name if name is not None else None
+        self.attributes = attributes if attributes is not None else None
+        if (self.name is not None) and (self.attributes is None):
+            self.attributes = tokenize(self.name, tokenby, pid)
+
         # handle data reading
         if(isinstance(data,str)):
-            if name is None:
+            if self.name is None:
                 self.name = strip_path(data)
-            else:
-                self.name = name
-
-            self.attributes = tokenize(self.name, tokenby, pid)
+            if self.attributes is None:
+                self.attributes = tokenize(self.name, tokenby, pid)
             self.get_data(data, header=header, **kwargs)
         else:
-            self.name = name
-            if (attributes == None) and (isinstance(name, str)):
-                self.attributes = tokenize(self.name, tokenby, pid)
-            else:
-                self.attributes = attributes
             if(isinstance(data, dict)):
-                if "read_json_file" in flag:
+                if json_file:
                     self.data = pd.DataFrame(**data)
                 else:
                     self.data = pd.DataFrame(data)
@@ -124,8 +122,7 @@ class Event:
             # if self.function is present replace it only if function!=None
             if function is not None:
                 self.function = function
-            else:
-                if("function" not in dir(self)):
+            elif("function" not in dir(self)):
                     self.function = function
                     
         # create self.function_flat
