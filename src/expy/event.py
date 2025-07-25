@@ -121,8 +121,13 @@ class Event:
         else:
             # if self.function is present replace it only if function!=None
             if function is not None:
+                try:
+                    if len(function) == 0:
+                        function = None
+                except:
+                    pass
                 self.function = function
-            elif("function" not in dir(self)):
+            elif("function" not in dir(self)): # if it is None and not already existing
                     self.function = function
                     
         # create self.function_flat
