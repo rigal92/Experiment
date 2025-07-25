@@ -62,16 +62,15 @@ def read_event(dic, flag = None):
     ev = Event(**{key:check(key) for key in ["name", "attributes", "data", "function"]}, flag = flag)
     return ev
 
-def read_fityk(filename_or_session, errors=True):
+def read_fityk(filename, errors=True):
     """
     Read the Experiment from a fityk file or session.
     Inputs
     ------
-    filename_or_session: str or Fityk
+    filename: str
 
     errors: bool, default=True
-        include errors, only possible when reading from
-        a file
+        include errors
     Return
     ------
     Experiment
@@ -79,14 +78,10 @@ def read_fityk(filename_or_session, errors=True):
     """
     import pyfityk
     ex = Experiment()
-    if isinstance(filename_or_session,str):
-        title, data, funcs = pyfityk.read_fityk_text(filename_or_session, errors)
-    else:
-        title, data, funcs = pyfityk.read_fityk(filename_or_session)
+    title, data, funcs = pyfityk.read_fityk(filename)
     for t, d, f in zip(title, data, funcs):
         ex[t] = Event(data=d, function=f, name=t)
         ex[t].rename_data_columns()
-
     return ex
 
 def get_notebook_template(folder = "./"):
