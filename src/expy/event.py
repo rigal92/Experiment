@@ -90,6 +90,7 @@ class Event:
         """
 
         flag = accept_event_flags(flag, ["pressure", "read_json_file"])
+        pid = "pressure" in flag
         # handle data reading
         if(isinstance(data,str)):
             if name is None:
@@ -97,12 +98,14 @@ class Event:
             else:
                 self.name = name
 
-            pid = "pressure" in flag
             self.attributes = tokenize(self.name, tokenby, pid)
             self.get_data(data, header=header, **kwargs)
         else:
             self.name = name
-            self.attributes = attributes
+            if (attributes == None) and (isinstance(name, str)):
+                self.attributes = tokenize(self.name, tokenby, pid)
+            else:
+                self.attributes = attributes
             if(isinstance(data, dict)):
                 if "read_json_file" in flag:
                     self.data = pd.DataFrame(**data)
