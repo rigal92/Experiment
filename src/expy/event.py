@@ -226,7 +226,7 @@ class Event:
     # Loaders 
     # -----------------------------------------------------------------
 
-    def get_function_table(self,extra = "all", verbose = False):
+    def get_function_table(self, extra = "all", verbose = False):
         """
         Return function table where extra columns can be added. 
 
@@ -268,7 +268,6 @@ class Event:
                 extra = [extra]
             #
             cols = [(label,self.attributes[label]) if label in self.attributes else None for label in extra] + [("name",self.name)] 
-
         df = self.function.copy()
         # df.insert(0,"name",self.name)
         [df.insert(0,x[0],x[1]) if x is not None else None for x in cols]

@@ -78,10 +78,13 @@ def read_fityk(filename, errors=True):
     """
     import pyfityk
     ex = Experiment()
-    title, data, funcs = pyfityk.read_fityk(filename)
-    for t, d, f in zip(title, data, funcs):
-        ex[t] = Event(data=d, function=f, name=t)
-        ex[t].rename_data_columns()
+    data = pyfityk.read_fityk_text(filename)
+    for i in data:
+        title = i["title"]
+        ex[title] = Event(data=i["data"], function=i["functions"], name=title)
+        ex[title].attributes["model"] = i["model"]
+        ex[title].attributes["model_formula"] = i["model_formula"]
+        ex[title].rename_data_columns()
     return ex
 
 def get_notebook_template(folder = "./"):

@@ -18,7 +18,10 @@ if __name__ == '__main__':
     # print(ev.function_flat)
     # df = read_fullprof_prf(filename5)
     ex = read_fityk(filename6)
-    print(ex)
+    # print(ex["Spot3_G_P17"])
+    # print(ex["Spot3_G_P17"].function_flat)
+    ex.tidy_functions()
+    print(ex.functions)
 
     # print(ex)
     # print(ex["Spot3_G_P07"].data)

@@ -57,7 +57,7 @@ class Experiment(dict):
     def summary(self):
         print(f"Experiment: {self.name} \n{len(self)} events found")
 
-    def tidy_functions(self,extra = "all", inplace = True):
+    def tidy_functions(self, extra = "all", inplace = True, include_models=False):
         """
         Assign self.functions to a DataFrrame with all the event functions
         attached.
@@ -75,16 +75,22 @@ class Experiment(dict):
             - list as for the point above but for a list of str
         inplace: bool, default: True
             modify the value inplace if True. return the function tables otherwise
-
+        include_models: bool, default=False
+            flag to include model and model_formula if present in attributes
         """
         functions = pd.concat([event.get_function_table(extra) for event in self.values()])
         functions.reset_index(drop = True, inplace = True)
         functions_flat = pd.DataFrame([event.get_function_flat(extra) for event in self.values()])
+        if not include_models:
+            functions = functions.drop(columns = ["model", "model_formula"], errors="ignore")
+            functions_flat = functions_flat.drop(columns = [("model",""), ("model_formula", "")], errors="ignore")
+
         if inplace:
             self.functions = functions
             self.functions_flat = functions_flat
         else:
             return functions, functions_flat
+
     def get_attributes(self):
         """
         Return a table with the attributes 
