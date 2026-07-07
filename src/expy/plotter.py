@@ -10,6 +10,7 @@ def plot_event(
         normalized = {"ref":"y", "exclude":"x"}, 
         bg_pattern = None,
         to_background = ["y","ftot"],
+        add_bg = False,
         drop_bg = True,
         shift = 0,
         #plotting parameters
@@ -51,6 +52,9 @@ def plot_event(
     to_background: None, str or list, default: ["y","ftot"]
         Column names to which the background will be substracted.
         None value will affect all the columns
+    add_bg: None, str or list[str], default: None
+        str or list of str selecting the column names for which the background
+        is added instead of subtracted.
     drop_bg: Bool, default: True
         avoid drawing columns used for the background substraction 
     shift: float, default: 0
@@ -103,9 +107,12 @@ def plot_event(
             if(drop_bg == True):
                 df.drop(labels, axis = 1, inplace = True)
         if(to_background is None):
-            #select all columns apart for x
+            # select all columns apart for x
             to_background = list(filter(lambda y:y!=x, df.columns))
         df[to_background] = df[to_background].sub(bg,axis = 0)
+        if add_bg is not None:
+            df[add_bg] = df[add_bg].add(bg,axis = 0)
+
     #manage x limits
     if(xlim):
         if(not isinstance(xlim,tuple)):
