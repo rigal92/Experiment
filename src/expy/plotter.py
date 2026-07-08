@@ -54,7 +54,8 @@ def plot_event(
         None value will affect all the columns
     add_bg: None, str or list[str], default: None
         str or list of str selecting the column names for which the background
-        is added instead of subtracted.
+        is added instead of subtracted. If str type the columns will be
+        selected using pd.Index.str.match
     drop_bg: Bool, default: True
         avoid drawing columns used for the background substraction 
     shift: float, default: 0
@@ -111,7 +112,12 @@ def plot_event(
             to_background = list(filter(lambda y:y!=x, df.columns))
         df[to_background] = df[to_background].sub(bg,axis = 0)
         if add_bg is not None:
-            df[add_bg] = df[add_bg].add(bg,axis = 0)
+            if isinstance(add_bg, str):
+                df.loc[:,df.columns.str.match(add_bg)] = df.loc[:,df.columns.str.match(add_bg)].add(bg,axis = 0)
+            elif isinstance(add_bg, list):
+                df[add_bg] = df[add_bg].add(bg,axis = 0)
+            else:
+                raise TypeError("Type not allowed for add_bg. Allowed types are str and list.")
 
     #manage x limits
     if(xlim):
