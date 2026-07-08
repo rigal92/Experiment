@@ -10,7 +10,7 @@ def plot_event(
         normalized = {"ref":"y", "exclude":"x"}, 
         bg_pattern = None,
         to_background = ["y","ftot"],
-        add_bg = False,
+        add_bg = None,
         drop_bg = True,
         shift = 0,
         #plotting parameters
